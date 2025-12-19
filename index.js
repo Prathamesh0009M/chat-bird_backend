@@ -17,13 +17,29 @@ import fs from "fs";
 // Load environment variables
 dotenv.config();
 
+
+import fs from "fs";
+import path from "path";
+
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+  const credentialsPath = path.join("/tmp", "gcloud-key.json");
+
+  fs.writeFileSync(
+    credentialsPath,
+    process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
+  );
+
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
+}
+
+
 // Initialize Express app
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
     credentials: true
   }
 });
@@ -34,7 +50,7 @@ app.use(cookieParser());
 app.use(express.static("public"));
 app.use(cors({
   origin: "http://localhost:3000",
-  methods: ["GET", "POST", "DELETE", "PUT"],
+  methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],  // ✅ Added PATCH
   credentials: true
 }));
 
@@ -64,8 +80,8 @@ app.use("/api/conv-media", userMediaRoutes);      // User avatar/cover routes
 
 // Health check
 app.get("/health", (req, res) => {
-  res.json({ 
-    status: "OK", 
+  res.json({
+    status: "OK",
     timestamp: new Date().toISOString(),
     services: {
       mongodb: "connected",
