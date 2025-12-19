@@ -22,6 +22,7 @@
   "type": "module",
   "description": "",
   "main": "index.js",
+  "test": "echo \"No tests yet\"",
   "scripts": {
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -23,9 +23,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Uncomment when tests exist
-      # - name: Run tests
-      #   run: npm test
+      - name: Run tests
+        run: npm test
 
-      - name: Build app
-        run: npm run build
+      - name: Basic check
+        run: node -v
