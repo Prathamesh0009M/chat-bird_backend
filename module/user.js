@@ -81,13 +81,6 @@ const userSchema = new mongoose.Schema({
         default: true
     },
     
-    phoneNumber: {
-        type: String,
-        // unique: true,
-        sparse: true,
-        trim: true
-    },
-    
     lastSeen: {
         type: Date,
         default: Date.now
