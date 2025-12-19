@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Translation Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .chat-container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        #messages { list-style-type: none; padding: 0; margin: 0 0 20px 0; height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; }
+        #messages li { padding: 8px 12px; margin-bottom: 10px; border-radius: 5px; }
+        #messages li.sent { background-color: #dcf8c6; text-align: right; }
+        #messages li.received { background-color: #f1f0f0; text-align: left; }
+        .form-group { margin-bottom: 10px; }
+        input { width: 95%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 15px; border: none; background-color: #5cb85c; color: white; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #4cae4c; }
+        .user-info { font-size: 0.8em; color: #888; display: block; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Translation Chat</h2>
+        
+        <div class="form-group">
+            <label for="userId">Your User ID:</label>
+            <input id="userId" type="text" placeholder="Enter your User ID to connect...">
+        </div>
+         <div class="form-group">
+            <label for="recipientIds">Recipient User IDs (comma-separated):</label>
+            <input id="recipientIds" type="text" placeholder="e.g., user2_id,user3_id">
+        </div>
+         <div class="form-group">
+            <label for="conversationId">Conversation ID:</label>
+            <input id="conversationId" type="text" placeholder="The ID of this chat room">
+        </div>
+        
+        <ul id="messages"></ul>
+        
+        <form id="form" action="">
+            <input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button>
+        </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
