@@ -12,14 +12,13 @@ import userMediaRoutes from "./routes/userMediaRoutes.js";
 // import mediaRoutes from "./routes/mediaRoutes.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import fs from "fs";
 
+import fs from "fs";
+import path from "path";
 // Load environment variables
 dotenv.config();
 
 
-import fs from "fs";
-import path from "path";
 
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
   const credentialsPath = path.join("/tmp", "gcloud-key.json");
