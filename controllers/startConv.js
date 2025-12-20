@@ -12,6 +12,8 @@ export const startConversation = async (req, res) => {
         }
         const userA = await User.findById(userAId);
         const userB = await User.findById(userBId);
+        console.log("Starting conversation between:", userAId, "and", userBId);
+
         if (!userA || !userB) {
             return res.status(404).json({
                 success: false,

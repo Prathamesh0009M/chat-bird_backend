@@ -71,6 +71,25 @@ const initializeApp = async () => {
 
 initializeApp();
 
+// test-translation.js
+import { translateText } from "./services/translationService.js";
+
+async function test() {
+  const text = "Hello, how are you?";
+
+  console.log('\n=== Testing Google Translate API ===\n');
+
+  const spanish = await translateText(text, 'es');
+  console.log('Spanish:', spanish);
+
+  const kannada = await translateText(text, 'kn');
+  console.log('Kannada:', kannada);
+
+  const hindi = await translateText(text, 'hi');
+  console.log('Hindi:', hindi);
+}
+
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/chats", chats);

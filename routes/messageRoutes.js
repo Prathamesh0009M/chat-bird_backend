@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllUsers } from "../controllers/user.js";
+import { getAllUsers, updateUserLanguage } from "../controllers/user.js";
 import { getMessages } from "../controllers/messageController.js";
 import { startConversation, getconnectedUsers } from "../controllers/startConv.js";
 import { auth } from "../middleware/auth.js";
@@ -8,12 +8,12 @@ import Conversation from "../module/conversation.js";
 const router = express.Router();
 
 // router.get("/:conversationId", getMessages);
-router.post("/startConvo",  startConversation);
+router.post("/startConvo", startConversation);
 router.post("/getConnectedUser", auth, getconnectedUsers);
 // router.get("/connectedUsers", getconnectedUsers);
 router.get("/getAllUser", auth, getAllUsers);
 router.get("/:conversationId/messages", getMessages);
-
+router.patch("/update-lang", auth, updateUserLanguage);
 
 // Get conversation details with participants
 router.get("/conversation/:conversationId", async (req, res) => {

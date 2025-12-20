@@ -88,11 +88,12 @@ export const invalidateChatHistoryCache = async (conversationId, userIds) => {
     
     userIds.forEach(userId => {
       const redisKey = `chat:${conversationId}:${userId}`;
+      console.log(`🗑️ Deleting cache key: ${redisKey}`);
       pipeline.del(redisKey);
     });
     
-    await pipeline.exec();
-    console.log(`🗑️ Invalidated chat history cache for ${userIds.length} users`);
+    const results = await pipeline.exec();
+    console.log(`🗑️ Cache invalidation results:`, results);
   } catch (error) {
     console.error("❌ Cache invalidation error:", error);
   }

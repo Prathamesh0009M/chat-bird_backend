@@ -18,19 +18,22 @@ import { encrypt, decrypt } from "../utils/encryption.js";
 
 export const handleLoadChatHistory = async (socket, { conversationId, userId }) => {
   try {
+    // 🔥 CRITICAL: ALWAYS fetch fresh user data from DB
+    // This ensures we get the latest preferredLanguage
     const user = await User.findById(userId);
     if (!user) {
       socket.emit("error", { message: "User not found" });
       return;
     }
 
+    // 🔥 Get the CURRENT preferred language (after any updates)
     const userLang = user.preferredLanguage;
+    console.log(`📖 [LOAD HISTORY] User: ${userId}, Language: ${userLang}`);
 
-    // Try to get from cache first
+    // Try to get from cache (cache key includes userId, so each user has their own cache)
     const cachedHistory = await getChatHistoryFromCache(conversationId, userId);
 
     if (cachedHistory) {
-      console.log(`✅ Sending cached chat history to user ${userId}`);
       socket.emit("chatHistory", {
         conversationId,
         messages: cachedHistory
@@ -39,15 +42,13 @@ export const handleLoadChatHistory = async (socket, { conversationId, userId }) 
     }
 
     // Fetch from database
-    console.log(`📦 Fetching chat history from DB for user ${userId}`);
+    console.log(`📦 Cache miss - fetching from DB for ${userLang}`);
     const messages = await getConversationMessages(conversationId);
 
-    // Translate each message for this user
+    // Translate each message for this user's CURRENT language
     const translatedMessages = await Promise.all(
       messages.map(async (msg) => {
-
-        // 👇 STEP 1: DECRYPT THE DB TEXT
-        // Only decrypt if it's a text message
+        // STEP 1: DECRYPT (only for text messages)
         let plainText = msg.text;
         if (msg.messageType === 'text' && msg.text) {
           plainText = decrypt(msg.text);
@@ -55,27 +56,27 @@ export const handleLoadChatHistory = async (socket, { conversationId, userId }) 
 
         let finalDisplayText = plainText;
 
-        // 👇 STEP 2: TRANSLATE (Using the decrypted plainText)
+        // STEP 2: TRANSLATE if needed
         if (msg.messageType === "text" && msg.language !== userLang) {
-          // We create a temporary object with plainText to pass to your translation service
+          console.log(`🔄 Translate: ${msg.language} → ${userLang}`);
           const tempMsg = { ...msg.toObject(), text: plainText };
           finalDisplayText = await batchTranslateMessages(tempMsg, userId, userLang);
         }
 
-        // Base message structure
+        // Build response
         const messageObj = {
           messageId: msg._id,
-          text: finalDisplayText, // Send the readable text to client
+          text: finalDisplayText,
           sender: msg.sender._id,
           senderName: msg.sender.username,
-          lang: userLang,
+          lang: userLang, // The language we're displaying in
           originalLanguage: msg.language,
           createdAt: msg.createdAt,
           isMine: msg.sender._id.toString() === userId,
           messageType: msg.messageType || "text"
         };
 
-        // Add media info if it's a media message
+        // Add media if present
         if (msg.messageType === "image" || msg.messageType === "video") {
           messageObj.media = {
             url: msg.media.url,
@@ -88,7 +89,7 @@ export const handleLoadChatHistory = async (socket, { conversationId, userId }) 
       })
     );
 
-    // Cache the translated chat history
+    // Cache for this specific user in their language
     await setChatHistoryCache(conversationId, userId, translatedMessages);
 
     socket.emit("chatHistory", {
@@ -96,14 +97,13 @@ export const handleLoadChatHistory = async (socket, { conversationId, userId }) 
       messages: translatedMessages
     });
 
-    console.log(`📜 Sent ${translatedMessages.length} messages to user ${userId}`);
+    console.log(`✅ Sent ${translatedMessages.length} messages in ${userLang}`);
 
   } catch (error) {
     console.error("❌ Error loading chat history:", error);
     socket.emit("error", { message: "Failed to load chat history" });
   }
 };
-
 export const handleSendMessage = async (socket, data) => {
   const { conversationId, senderId, text, language, recipients } = data;
 

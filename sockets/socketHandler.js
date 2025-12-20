@@ -34,18 +34,15 @@ export const initializeSocket = (io) => {
               
               // Handle different message types
               if (messageData.type === "messageDeleted") {
-                // Handle message deletion
                 socket.emit("messageDeleted", {
                   messageId: messageData.messageId,
                   conversationId: messageData.conversationId
                 });
                 console.log(`🗑️ Notified user ${userId} of deleted message`);
               } else if (messageData.messageType === "image" || messageData.messageType === "video") {
-                // Handle media messages
                 socket.emit("receiveMediaMessage", messageData);
                 console.log(`📸 Delivered ${messageData.messageType} message to user ${userId}`);
               } else {
-                // Handle text messages
                 socket.emit("receiveMessage", messageData);
                 console.log(`📨 Delivered text message to user ${userId}`);
               }
@@ -55,7 +52,6 @@ export const initializeSocket = (io) => {
           }
         });
 
-        // Store subscriber reference for cleanup
         socket.redisSubscriber = subscriber;
       } catch (error) {
         console.error("❌ Error registering user:", error);
@@ -68,6 +64,12 @@ export const initializeSocket = (io) => {
       await handleLoadChatHistory(socket, data);
     });
 
+    // 🔥 NEW: Reload chat history when language changes
+    socket.on("reloadChatHistory", async (data) => {
+      console.log(`🌐 Reloading chat history for language change:`, data);
+      await handleLoadChatHistory(socket, data);
+    });
+
     // Send text message
     socket.on("sendMessage", async (data) => {
       await handleSendMessage(socket, data);
@@ -76,7 +78,6 @@ export const initializeSocket = (io) => {
     // Typing indicator
     socket.on("typing", async ({ conversationId, userId, isTyping }) => {
       try {
-        // Broadcast typing status to other participants
         socket.to(conversationId).emit("userTyping", {
           userId,
           conversationId,
@@ -103,12 +104,10 @@ export const initializeSocket = (io) => {
     socket.on("disconnect", async () => {
       console.log(`🔌 Socket disconnected: ${socket.id}`);
       
-      // Unsubscribe from Redis
       if (socket.redisSubscriber) {
         await socket.redisSubscriber.quit();
       }
       
-      // Unregister user
       await unregisterUser(socket.id);
     });
 

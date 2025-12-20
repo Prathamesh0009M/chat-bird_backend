@@ -27,21 +27,27 @@ export const getConversationMessages = async (conversationId) => {
 export const batchTranslateMessages = async (message, userId, userLang) => {
     let translatedText = message.text;
 
+    // 🔥 IMPORTANT: Only translate if languages are different
     if (message.language !== userLang) {
         // Check cache first
         const cached = await getTranslationFromCache(message._id, userId);
 
         if (cached) {
+            console.log(`✅ Cache hit for message ${message._id}`);
             translatedText = cached;
         } else {
             // Translate and cache
+            console.log(`🔄 Translating from ${message.language} to ${userLang}`);
             translatedText = await translateText(message.text, userLang);
             await setTranslationCache(message._id, userId, translatedText);
         }
+    } else {
+        console.log(`⏭️ Skip translation - same language (${userLang})`);
     }
 
     return translatedText;
 };
+
 
 export const prepareMessageResponse = (message, translatedText, userLang, userId) => {
     return {

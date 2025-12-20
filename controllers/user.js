@@ -1,6 +1,6 @@
 import User from "../module/user.js";
 import Conversation from "../module/conversation.js";
-
+import { invalidateChatHistoryCache } from "../services/cacheService.js";
 
 export const getUserProfile = async (req, res) => {
     try {
@@ -92,7 +92,7 @@ export const deleteUser = async (req, res) => {
 export const getAllUsers = async (req, res) => {
     try {
         const loggedInUserId = req.user.id || req.user._id;
-        if(!loggedInUserId){
+        if (!loggedInUserId) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid user ID"
@@ -146,6 +146,49 @@ export const getconnectedUsers = async (req, res) => {
     }
 };
 
+export const updateUserLanguage = async (req, res) => {
+    try {
+        const userId = req.user.id || req.user._id;
+        const { preferredLanguage, conversationId } = req.body;
+
+        if (!preferredLanguage) {
+            return res.status(400).json({
+                success: false,
+                message: "preferredLanguage is required"
+            });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // Update user's preferred language
+        user.preferredLanguage = preferredLanguage;
+        await user.save();
+
+        // 🔥 IMPORTANT: Invalidate the chat history cache for this user
+        if (conversationId) {
+            await invalidateChatHistoryCache(conversationId, [userId]);
+            console.log(`🗑️ Invalidated cache for user ${userId} in conversation ${conversationId}`);
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Preferred language updated successfully",
+            preferredLanguage: user.preferredLanguage
+        });
+    } catch (error) {
+        console.error("❌ Error updating preferred language:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while updating preferred language"
+        });
+    }
+};
 
 
 
