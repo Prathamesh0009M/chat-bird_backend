@@ -1,4 +1,5 @@
 import User from "../module/user.js"
+import Conversation from "../module/conversation.js";
 import {
   getConversationMessages,
   batchTranslateMessages,
@@ -9,6 +10,8 @@ import {
   getChatHistoryFromCache,
   setChatHistoryCache
 } from "../services/cacheService.js";
+
+
 
 // Get messages for a conversation (with caching and translation)
 export const getMessages = async (req, res) => {
@@ -36,7 +39,7 @@ export const getMessages = async (req, res) => {
 
     // Try cache first
     const cachedHistory = await getChatHistoryFromCache(conversationId, userId);
-    
+
     if (cachedHistory) {
       console.log(`✅ Returning cached chat history for user ${userId}`);
       return res.json({
@@ -51,7 +54,7 @@ export const getMessages = async (req, res) => {
     // Fetch from database and translate
     console.log(`📦 Fetching and translating messages for user ${userId}`);
     const messages = await getConversationMessages(conversationId);
-    
+
     // Batch translate messages
     const translatedMessagesData = await batchTranslateMessages(
       messages.map(msg => ({

@@ -5,6 +5,15 @@ const conversationSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     }], // [UserA, UserB]
+    lastMessage: {
+        type: String,
+        default: null,
+        trim: true
+    },
+    lastMessageAt: {
+        type: Date,
+        default: Date.now
+    },
     createdAt: {
         type: Date,
         default: Date.now

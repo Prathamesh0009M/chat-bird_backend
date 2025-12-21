@@ -109,8 +109,14 @@ export const handleSendMessage = async (socket, data) => {
 
   try {
     // Save to MongoDB
-    const encryptedText = encrypt(text);
+    const updatedConversation = await Conversation.findByIdAndUpdate(
+      conversationId,
+      { lastMessage: text?.substring(0, 50) || null },
+      {lastMessageAt: Date.now()},
+      { new: true }
+    );
 
+    const encryptedText = encrypt(text);
     const newMessage = await saveMessage(
       conversationId,
       senderId,
@@ -120,6 +126,11 @@ export const handleSendMessage = async (socket, data) => {
 
     // Get sender info
     const sender = await User.findById(senderId);
+  
+    if (sender) {
+      sender.isOnline = true; // For real-time status
+      sender.lastSeen = Date.now();
+    }
 
     // Get all participants for cache invalidation
     const conversation = await Conversation.findById(conversationId);
@@ -133,7 +144,7 @@ export const handleSendMessage = async (socket, data) => {
       text: text,
       sender: senderId,
       senderName: sender.username,
-      lang: language, 
+      lang: language,
       messageId: newMessage._id,
       createdAt: newMessage.createdAt,
       isMine: true,

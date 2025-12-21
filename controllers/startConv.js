@@ -1,5 +1,6 @@
 import User from "../module/user.js"
 import Conversation from "../module/conversation.js";
+import { decrypt } from "../utils/encryption.js";
 
 export const startConversation = async (req, res) => {
     try {
@@ -62,10 +63,25 @@ export const getconnectedUsers = async (req, res) => {
         const connectedUsers = conversations.flatMap(convo =>
             convo.participants
                 .filter(p => p._id.toString() !== userId)
-                .map(p => ({
-                    conversationId: convo._id,
-                    user: p
-                }))
+                .map(p => {
+                    // Safely decrypt lastMessage
+                    let decryptedMessage = null;
+                    if (convo.lastMessage) {
+                        try {
+                            decryptedMessage = decrypt(convo.lastMessage);
+                        } catch (err) {
+                            console.error('Failed to decrypt message for conversation:', convo._id, err.message);
+                            decryptedMessage = null; // or "Message unavailable"
+                        }
+                    }
+
+                    return {
+                        conversationId: convo._id,
+                        user: p,
+                        lastMessage: decryptedMessage,
+                        lastMessageTime: convo.updatedAt || convo.createdAt
+                    };
+                })
         );
 
         return res.status(200).json({
@@ -81,4 +97,3 @@ export const getconnectedUsers = async (req, res) => {
         });
     }
 };
-

@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     // },
     email: {
         type: String,
-        required: true, 
+        required: true,
         unique: true
     },
     password: {
@@ -26,7 +26,12 @@ const userSchema = new mongoose.Schema({
         default: "en",
         enum: ["en", "hi", "mr", "kn", "es", "fr", "de", "ja", "zh", "ar", "pt", "ru", "it"]
     },
-    
+
+    profilePicture: {
+        type: String,
+        default: null
+    },
+
     // ===== PROFILE MEDIA (CLOUD STORAGE) =====
     avatar: {
         url: {
@@ -42,7 +47,7 @@ const userSchema = new mongoose.Schema({
             default: null
         }
     },
-    
+
     coverPhoto: {
         url: {
             type: String,
@@ -57,48 +62,48 @@ const userSchema = new mongoose.Schema({
             default: null
         }
     },
-    
+
     // Default avatar settings if no image uploaded
     avatarColor: {
         type: String,
         default: "#667eea"
     },
-    
+
     bio: {
         type: String,
         maxlength: 150,
         default: "Hey there! I'm using ChatApp"
     },
-    
+
     status: {
         type: String,
         enum: ["online", "offline", "away", "busy", "invisible"],
         default: "offline"
     },
-    
+
     autoTranslate: {
         type: Boolean,
         default: true
     },
-    
+
     lastSeen: {
         type: Date,
         default: Date.now
     },
-    
+
     isOnline: {
         type: Boolean,
         default: false
     },
-    
 
-    
+
+
 }, {
     timestamps: true
 });
 
 // ===== VIRTUAL FIELDS =====
-userSchema.virtual('initials').get(function() {
+userSchema.virtual('initials').get(function () {
     return this.name
         .split(' ')
         .map(n => n[0])

@@ -19,7 +19,6 @@ const messageSchema = new mongoose.Schema({
         type: String,
         default: "en"
     },
-    
     // NEW: Add these fields
     messageType: {
         type: String,

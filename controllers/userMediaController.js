@@ -124,7 +124,7 @@ export const uploadMedia = async (req, res) => {
 
 export const getUserMedia = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id || req.user._id;
 
         const media = await Message.find({
             sender: userId,

@@ -1,6 +1,7 @@
 import User from "../module/user.js";
 import Conversation from "../module/conversation.js";
 import { invalidateChatHistoryCache } from "../services/cacheService.js";
+import { uploadToCloudinary } from "../config/cloudinary.js";
 
 export const getUserProfile = async (req, res) => {
     try {
@@ -28,32 +29,37 @@ export const getUserProfile = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
     try {
-        const userId = req.params.id;
-        const { name, email, preferredLanguage } = req.body;
-        const user = await User.findById
-            (userId);
+        const userId = req.user.id;
+        const { name, email, preferredLanguage, bio } = req.body;
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({
                 success: false,
-
                 message: "User not found"
             });
         }
-        user.name = name || user.name;
-        user.email = email || user.email;
-        user.preferredLanguage = preferredLanguage || user.preferredLanguage;
-        await user.save();
+        if (req.file) {
+            const cloudinaryResult = await uploadToCloudinary(
+                req.file,
+                "profilePicture"
+            );
+            user.profilePicture = cloudinaryResult.secure_url;
+        }
 
+        // Update fields if provided
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (preferredLanguage) user.preferredLanguage = preferredLanguage;
+        // if (profilePicture) user.profilePicture = profilePicture;
+        if (bio) user.bio = bio;
+        await user.save();
         res.status(200).json({
             success: true,
             message: "User profile updated successfully",
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                preferredLanguage: user.preferredLanguage
-            }
+            user
         });
+
+
     } catch (error) {
         console.error("❌ Error updating user profile:", error);
         res.status(500).json({

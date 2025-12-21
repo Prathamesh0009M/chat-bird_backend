@@ -1,5 +1,6 @@
 import Message from "../module/message.js"
 import User from "../module/user.js"
+import Conversation from "../module/conversation.js";
 import { translateText } from "./translationService.js";
 import {
     getTranslationFromCache,
@@ -12,8 +13,10 @@ export const saveMessage = async (conversationId, senderId, text, language) => {
         sender: senderId,
         text,
         language,
+        lastMessage: text?.substring(0, 50) || null
     });
 
+    
     await newMessage.save();
     return newMessage;
 };

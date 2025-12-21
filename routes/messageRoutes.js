@@ -21,7 +21,7 @@ router.get("/conversation/:conversationId", async (req, res) => {
         const { conversationId } = req.params;
 
         const conversation = await Conversation.findById(conversationId)
-            .populate('participants', 'username email preferredLanguage');
+            .populate('participants', 'name email preferredLanguage');
 
         if (!conversation) {
             return res.status(404).json({
