@@ -47,4 +47,4 @@ export const auth = async (req, res, next) => {
             message: "something went wrong while validating the token",
         });
     }
-};
+};  
